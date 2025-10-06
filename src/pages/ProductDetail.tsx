@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -71,6 +71,21 @@ const ProductDetail = () => {
 
   const [timeLeft, setTimeLeft] = useState(900); // 15 minutes in seconds
 
+  // Countdown timer effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 0) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -96,22 +111,51 @@ const ProductDetail = () => {
       return;
     }
 
-    // TODO: Integrate with dr.cash API
-    // Send lead data to dr.cash platform
-    const leadData = {
-      name: formData.name,
-      phone: `${formData.countryCode}${formData.phone}`,
-      country: formData.countryCode,
-      product: product.name,
-      productCode: product.code,
-    };
+    try {
+      // Send lead data to dr.cash via edge function
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-lead`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            phone: `${formData.countryCode}${formData.phone}`,
+            country: formData.countryCode,
+            product: product.name,
+            productCode: product.code,
+          }),
+        }
+      );
 
-    console.log("Lead data to send to dr.cash:", leadData);
+      const data = await response.json();
 
-    toast({
-      title: "Order received!",
-      description: "We'll contact you shortly to confirm your order.",
-    });
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to submit order');
+      }
+
+      toast({
+        title: "Order received!",
+        description: "We'll contact you shortly to confirm your order.",
+      });
+
+      // Reset form
+      setFormData({
+        name: "",
+        countryCode: "+55",
+        phone: "",
+        terms: false,
+      });
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to submit order. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Format time as MM:SS

@@ -23,38 +23,22 @@ serve(async (req) => {
     }
 
     // Prepare lead data for dr.cash
-    // Based on dr.cash documentation, leads are typically sent with:
-    // - webmaster token (API key)
-    // - customer data (name, phone)
-    // - product/offer information
     const leadData = {
       name: name,
       phone: phone,
       country: country,
       product: product,
       product_code: productCode,
-      // dr.cash typically uses these fields:
       token: drCashApiKey,
-      // You may need to add:
-      // stream_id: 'your-stream-id', // Get this from dr.cash dashboard
-      // offer_id: 'your-offer-id', // Get this from dr.cash dashboard
-      // Additional tracking parameters:
-      sub1: productCode, // Use product code for tracking
-      sub2: country, // Use country for tracking
+      stream_id: 'IT',
+      offer_id: '1ye1w',
+      sub1: productCode,
+      sub2: country,
     };
 
     console.log('Sending lead to dr.cash:', leadData);
 
-    // Note: The actual dr.cash API endpoint may vary
-    // Common endpoints are:
-    // - https://api.dr.cash/lead (generic)
-    // - https://[your-domain]/order.php (for PHP-based integration)
-    // You may need to adjust this URL based on your dr.cash account setup
-    
-    // For now, we'll log the data and return success
-    // Once you have the correct endpoint from dr.cash, uncomment and update:
-    
-    /*
+    // Send lead to dr.cash API
     const response = await fetch('https://api.dr.cash/lead', {
       method: 'POST',
       headers: {
@@ -69,7 +53,6 @@ serve(async (req) => {
     if (!response.ok) {
       throw new Error(`dr.cash API error: ${JSON.stringify(responseData)}`);
     }
-    */
 
     return new Response(
       JSON.stringify({ 

@@ -17,21 +17,27 @@ serve(async (req) => {
 
     console.log('Received lead data:', { name, phone, country, product, productCode });
 
+    const token = Deno.env.get('DR_CASH_API_KEY');
+    if (!token) {
+      throw new Error('Missing DR_CASH_API_KEY secret');
+    }
+
     // Prepare lead data for dr.cash
     const leadData = {
+      token,
       stream_id: 'IT',
       offer_id: '1ye1w',
-      name: name,
-      phone: phone,
-      country: country,
-      product: product,
+      name,
+      phone,
+      country,
+      product,
       product_code: productCode,
     };
 
-    console.log('Sending to dr.cash:', leadData);
+    console.log('Sending to dr.cash:', { ...leadData, token: '***' });
 
-    // Send lead to dr.cash
-    const drCashResponse = await fetch('https://api.dr.cash/lead', {
+    // Send lead to dr.cash (use root domain)
+    const drCashResponse = await fetch('https://dr.cash/api/lead', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

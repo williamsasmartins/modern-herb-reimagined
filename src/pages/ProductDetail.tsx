@@ -47,14 +47,14 @@ const products = {
 };
 
 const countries = [
-  { code: "+1", name: "USA/Canada", flag: "🇺🇸" },
-  { code: "+55", name: "Brazil", flag: "🇧🇷" },
-  { code: "+351", name: "Portugal", flag: "🇵🇹" },
-  { code: "+34", name: "Spain", flag: "🇪🇸" },
-  { code: "+44", name: "UK", flag: "🇬🇧" },
-  { code: "+33", name: "France", flag: "🇫🇷" },
-  { code: "+49", name: "Germany", flag: "🇩🇪" },
-  { code: "+39", name: "Italy", flag: "🇮🇹" },
+  { code: "+1", name: "USA/Canada", flag: "🇺🇸", iso: "US" },
+  { code: "+55", name: "Brazil", flag: "🇧🇷", iso: "BR" },
+  { code: "+351", name: "Portugal", flag: "🇵🇹", iso: "PT" },
+  { code: "+34", name: "Spain", flag: "🇪🇸", iso: "ES" },
+  { code: "+44", name: "UK", flag: "🇬🇧", iso: "GB" },
+  { code: "+33", name: "France", flag: "🇫🇷", iso: "FR" },
+  { code: "+49", name: "Germany", flag: "🇩🇪", iso: "DE" },
+  { code: "+39", name: "Italy", flag: "🇮🇹", iso: "IT" },
 ];
 
 const ProductDetail = () => {
@@ -123,7 +123,7 @@ const ProductDetail = () => {
           body: JSON.stringify({
             name: formData.name,
             phone: `${formData.countryCode}${formData.phone}`,
-            country: formData.countryCode,
+            country: countries.find((c) => c.code === formData.countryCode)?.iso || formData.countryCode,
             product: product.name,
             productCode: product.code,
           }),

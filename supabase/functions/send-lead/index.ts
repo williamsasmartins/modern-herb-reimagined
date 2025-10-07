@@ -40,17 +40,25 @@ serve(async (req) => {
     const drCashResponse = await fetch('https://dr.cash/api/lead', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
       },
-      body: JSON.stringify(leadData),
+      body: new URLSearchParams(leadData as Record<string, string>).toString(),
     });
 
-    const drCashData = await drCashResponse.json();
+    const raw = await drCashResponse.text();
+    let drCashData: unknown;
+    try {
+      drCashData = JSON.parse(raw);
+    } catch (_) {
+      drCashData = { raw };
+    }
     console.log('dr.cash response:', drCashData);
 
     if (!drCashResponse.ok) {
       console.error('dr.cash error:', drCashData);
-      throw new Error(drCashData.message || 'Failed to submit lead to dr.cash');
+      const msg = (drCashData as any)?.message || (drCashData as any)?.error || raw?.slice(0, 200) || 'Failed to submit lead to dr.cash';
+      throw new Error(msg);
     }
 
     return new Response(
